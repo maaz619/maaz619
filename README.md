@@ -1,3 +1,4 @@
+[![]([chat.svg](https://github.com/0xSynapse/readme-svg/blob/main/chat.svg))]
 ### Hi there 👋
 
 <!--
