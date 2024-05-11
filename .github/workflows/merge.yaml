@@ -1,41 +1,34 @@
 name: File and Folder Check
 
 on:
- pull_request:
-  paths:
-   - "**"
+  pull_request:
+    paths:
+      - '**'
 
 jobs:
- file_and_folder_check:
-  runs-on: ubuntu-latest
-
-  steps:
-   - name: Checkout repository
-     uses: actions/checkout@v2
-
-   - name: Fetch changes
-     run: git fetch origin ${{ github.event.pull_request.head.ref }}:$GITHUB_REF
-
-   - name: Check for renamed files or folders
-     id: renamed_check
-     run: |
-      git diff --name-status ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -E '^\s+R[0-9]*'
-      exit $?
-
-   - name: Check for new files or folders
-     id: added_check
-     run: |
-      git diff --name-status ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -E '^\s+[A]'
-      exit $?
-
-   - name: Fail if any files or folders are renamed
-     if: steps.renamed_check.outputs.stdout != ''
-     run: |
-      echo "Error: Files or folders have been renamed."
-      exit 1
-
-   - name: Fail if any new files or folders are added
-     if: steps.added_check.outputs.stdout != ''
-     run: |
-      echo "Error: New files or folders have been added."
-      exit 1
+  file_and_folder_check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Check for renamed files or folders
+        id: renamed_check
+        run: |
+          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep -E '^\s+R[0-9]*'
+          exit $?
+          
+      - name: Check for new files or folders
+        id: added_check
+        run: |
+          git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep -E '^\s+[A]'
+          exit $?
+          
+      - name: Fail if any files or folders are renamed
+        if: steps.renamed_check.outputs.stdout != ''
+        run: echo "Error: Files or folders have been renamed. Pull request check failed." && exit 1
+      
+      - name: Fail if any new files or folders are added
+        if: steps.added_check.outputs.stdout != ''
+        run: echo "Error: New files or folders have been added. Pull request check failed." && exit 1
